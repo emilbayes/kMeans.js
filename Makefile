@@ -3,6 +3,9 @@ REPORTER = dot
 
 check: test
 
+build:
+	coffee --bare --output . src/*.litcoffee
+
 test:
 	@NODE_ENV=test ./node_modules/.bin/mocha \
 		--reporter $(REPORTER) \

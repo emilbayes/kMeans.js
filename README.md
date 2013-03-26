@@ -1,5 +1,5 @@
-kMeans.js &emdash; k-means clustering on node.js and in the browser
-===================================================================
+Javascript implementation of the k-means algorithm, for node.js and the browser
+===============================================================================
 
 ##Example (JS)
 

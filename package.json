@@ -1,6 +1,6 @@
 {
     "name": "kMeans.js",
-    "version":  "0.1.0",
+    "version":  "0.1.1",
     "description": "Javascript implementation of the k-means algorithm, for node.js and the browser",
     "keywords": [
         "k-means",
@@ -9,6 +9,7 @@
         "ml",
         "clustering"
     ],
+    
     "author": "Emil Bay <melgaard@tixz.dk>",
 
     "devDependencies": {
