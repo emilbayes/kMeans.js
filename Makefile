@@ -1,9 +1,11 @@
 MOCHA_OPTS=
 REPORTER = dot
+M = ""
 
 check: test
 
 build:
+	npm version build
 	coffee --bare --output . src/*.litcoffee
 
 test:
@@ -14,7 +16,15 @@ test:
 docs:
 	docco ./src/*.litcoffee
 
-clean:
+publish:
+	git add .
+	git commint -m $(M)
+	npm publish
+
+patch: 
+	npm version patch
+
+publish-patch: publish patch
 
 
-.PHONY: test docs clean
+.PHONY: test docs

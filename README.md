@@ -19,9 +19,9 @@ Simple Javascript implementation of the k-means algorithm, for node.js and the b
         km.findClosestCentroids();
         km.moveCentroids();
 
-        console.log(km.centroids, km.clusters);
+        console.log(km.centroids);
 
-        if(km.hasConverged) break;
+        if(km.hasConverged()) break;
     }
 
     console.log('Finished in:', km.currentIteration, ' iterations');
