@@ -1,7 +1,7 @@
 {
-    "name": "kMeans.js",
+    "name": "simple-k-means",
     "version":  "0.1.1",
-    "description": "Javascript implementation of the k-means algorithm, for node.js and the browser",
+    "description": "Simple Javascript implementation of the k-means algorithm, for node.js and the browser",
     "keywords": [
         "k-means",
         "kmeans",
@@ -9,7 +9,7 @@
         "ml",
         "clustering"
     ],
-    
+
     "author": "Emil Bay <melgaard@tixz.dk>",
 
     "devDependencies": {

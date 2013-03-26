@@ -39,6 +39,12 @@ Options:
   * `m` (Integer): The number of datapoints in `X`.
   * `n` (Integer): The number of features of each datapoint in `X`.
 
+* `distanceMetric` (Function)
+  The function used to measure the distance between centroids and points in its 
+  cluster.  
+  **Default** is the sum of the squared error. Other metrics might be 
+  manhattan distance or minkowski distance.
+
 
 
         constructor: (options = {}) ->

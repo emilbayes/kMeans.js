@@ -1,5 +1,9 @@
-Javascript implementation of the k-means algorithm, for node.js and the browser
+Simple Javascript implementation of the k-means algorithm, for node.js and the browser
 ===============================================================================
+
+##Installation
+
+    npm install kmeans
 
 ##Example (JS)
 
