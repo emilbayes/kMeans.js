@@ -1,0 +1,28 @@
+{
+    "name": "kMeans.js",
+    "version":  "0.1.0",
+    "description": "Javascript implementation of the k-means algorithm, for node.js and the browser",
+    "keywords": [
+        "k-means",
+        "kmeans",
+        "machine learning",
+        "ml",
+        "clustering"
+    ],
+    "author": "Emil Bay <melgaard@tixz.dk>",
+
+    "devDependencies": {
+        "coffee-script":    "latest",
+        "docco":            "latest",
+        "mocha":            "latest",
+        "should":           "latest"
+    },
+
+    "main": "kMeans",
+    "repository": "https://github.com/tixz/kmeans.js",
+
+    "engines": {
+        "node": "*"
+    }
+
+}

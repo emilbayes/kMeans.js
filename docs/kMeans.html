@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>kMeans.litcoffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>kMeans.litcoffee</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <h2>Definitions</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>n: Features<br>m: Datapoints<br>K: Clusters<br>X: m×n dataset  </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="class"><span class="keyword">class</span> <span class="title">kMeans</span></span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h4">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <h4>initialize</h4>
+<p>Initialize a new k-means clustering object.
+Pass the following options, and proceed to clustering.
+Options:</p>
+<ul>
+<li><p><code>K</code> (Integer) <em>Default: 5</em><br>The number of clusters.</p>
+</li>
+<li><p><code>maxIterations</code> (Integer) <em>Default: 100</em><br>The number of iterations before the algorithm stops.</p>
+</li>
+<li><p><code>enableConvergenceTest</code> (Boolean) <em>Default: true</em><br>Enable convergence test. This test can be computationally intensive, but 
+might also save many iterations.</p>
+</li>
+<li><p><code>tolerance</code> (Float) <em>Default: 1e-9</em><br>Floating point value for the convergence tolerance.</p>
+</li>
+<li><p><code>initialize</code> (Function)<br>The function used to initialize the centroids.<br><em>Default:</em> The Forgy method, which chooses K random datapoints, as the 
+initial centroids. You can also write your own, with the following signature 
+fn(X, K, m, n), where:</p>
+<ul>
+<li><code>X</code> (2D Array): The set of datapoints. Remember this is passed by reference </li>
+</ul>
+</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">and</span> <span class="keyword">is</span> therefore **mutable**.</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <ul>
+<li><code>K</code> (Integer): The number of centroids to initialize.</li>
+<li><code>m</code> (Integer): The number of datapoints in <code>X</code>.</li>
+<li><code>n</code> (Integer): The number of features of each datapoint in <code>X</code>.</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    constructor: (options = {}) -&gt;
+        <span class="property">@K</span> = options.K ? <span class="number">5</span>
+        <span class="property">@maxIterations</span> = options.maxIterations ? <span class="number">100</span>
+        <span class="property">@enableConvergenceTest</span> = options.enableConvergenceTest ? <span class="literal">true</span>
+        <span class="property">@tolerance</span> = options.tolerance ? <span class="number">1e-9</span>
+        <span class="property">@initialize</span> = options.initialize ? kMeans.initializeForgy
+        <span class="property">@distanceMetric</span> = options.distanceMetric ? <span class="property">@sumSquared</span>
+
+        <span class="keyword">if</span> <span class="keyword">not</span> (<span class="number">1</span> &lt;= <span class="property">@K</span> &lt; Infinity)
+            <span class="keyword">throw</span> <span class="string">"K must be in the interval [1, Infinity)"</span>
+        <span class="keyword">if</span> <span class="keyword">not</span> (<span class="number">1</span> &lt;= <span class="property">@maxIterations</span> &lt; Infinity)
+            <span class="keyword">throw</span> <span class="string">"maxIterations must be in the interval [1, Infinity)"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h4">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <h4>cluster</h4>
+<p>Initialize clustering over dataset <code>X</code>.
+<code>X</code> should be a m×n matrix of m data rows and n feature columns.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    cluster: (<span class="property">@X</span>) -&gt;
+        <span class="property">@prevCentroids</span> = []
+        <span class="property">@clusters</span> = []
+        <span class="property">@currentIteration</span> = <span class="number">0</span>
+
+        [<span class="property">@m</span>, <span class="property">@n</span>] = [<span class="property">@X</span>.length, <span class="property">@X</span>[<span class="number">0</span>].length]
+
+        <span class="keyword">if</span> <span class="keyword">not</span> <span class="property">@m</span>? <span class="keyword">or</span> <span class="keyword">not</span> <span class="property">@n</span>? <span class="keyword">or</span> <span class="property">@n</span> &lt; <span class="number">1</span>
+            <span class="keyword">throw</span> <span class="string">"Data must be of the format [[x_11, ... , x_1n], ... , [x_m1, ... , x_mn]]"</span>
+
+        <span class="property">@centroids</span> = <span class="property">@initialize</span>(<span class="property">@X</span>, <span class="property">@K</span>, <span class="property">@m</span>, <span class="property">@n</span>)
+
+        <span class="keyword">if</span> <span class="property">@centroids</span>.length != <span class="property">@K</span> <span class="keyword">or</span> <span class="property">@centroids</span>[<span class="number">0</span>].length != <span class="property">@n</span>
+            <span class="keyword">throw</span> <span class="string">"`initialize` must return a K×n matrix"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h4">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <h4>step</h4>
+<p>Used when custom logic is interleaved within the clustering process.
+See <code>autoCluster(X)</code> method below for an example</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    step: -&gt;
+        <span class="property">@currentIteration</span>++ &lt; <span class="property">@maxIterations</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h4">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <h4>autoCluster</h4>
+<p>Cluster dataset <code>X</code> by means of the standard algorithm:
+1. Find closest centroid for each datapoint and assign it to the centroids cluster
+2. Move the centroid to the mean of its cluster
+3. <em>Optional</em> Check for convergence, by measuring the distance moved
+   by the centroid since the last iteration</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    autoCluster: (X) -&gt;
+        <span class="property">@cluster</span> X
+
+        <span class="keyword">while</span> <span class="property">@step</span>()
+            <span class="property">@findClosestCentroids</span>()
+            <span class="property">@moveCentroids</span>()
+
+            <span class="keyword">break</span> <span class="keyword">if</span> <span class="property">@hasConverged</span>()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h4">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <h4>initializeForgy</h4>
+<p>The Forgy method uses K random data points as initial centroids. Accessed as 
+<code>kMeans.initializeForgy</code><br><em>O(K)</em></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="property">@initializeForgy</span>: (X, K, m, n) -&gt;
+        X[Math.floor Math.random() * m] <span class="keyword">for</span> k <span class="keyword">in</span> [<span class="number">0.</span>..K]</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h4">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <h4>initializeInRange</h4>
+<p>This initialization places K centroids at random, within the range of the data points.
+Accessed as <code>kMeans.initializeInRange</code><br><em>O(n·m+K·n)</em></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="property">@initializeInRange</span>: (X, K, m, n) -&gt;
+
+        min = Infinity <span class="keyword">for</span> i <span class="keyword">in</span> [<span class="number">0.</span>..n]
+        max = -Infinity <span class="keyword">for</span> i <span class="keyword">in</span> [<span class="number">0.</span>..n]
+
+        <span class="keyword">for</span> x <span class="keyword">in</span> X
+            <span class="keyword">for</span> d, i <span class="keyword">in</span> x
+                min[i] = Math.min min[i], d
+                max[i] = Math.max max[i], d
+
+        (<span class="keyword">for</span> k <span class="keyword">in</span> [<span class="number">0.</span>..K]
+            (<span class="keyword">for</span> d <span class="keyword">in</span> [<span class="number">0.</span>..n]
+                Math.random() * (max[d] - min[d]) + min[d]
+            )
+        )</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h4">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <h4>findClosestCentroids</h4>
+<p>Assign each datapoint to the cluster of its closest centroid.
+This is done by adding the datapoint&#39;s index to an array of clusters,
+where the index of each cluster corrosponds to the index of the centroid for
+that cluster.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    findClosestCentroids: -&gt;
+        <span class="keyword">if</span> <span class="property">@enableConvergenceTest</span>
+            <span class="property">@prevCentroids</span> = (r.slice(<span class="number">0</span>) <span class="keyword">for</span> r <span class="keyword">in</span> <span class="property">@centroids</span>) <span class="comment">#Clone optimization</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Datapoints will be assigned to clusters to optimize the move step
+however, this means that it will be hard to find out which cluster a specific
+datapoint belongs to, without probing every element of every cluster</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="property">@clusters</span> = ([] <span class="keyword">for</span> i <span class="keyword">in</span> [<span class="number">0.</span>..<span class="property">@K</span>])
+
+        <span class="keyword">for</span> x, i <span class="keyword">in</span> <span class="property">@X</span>
+            cMin = <span class="number">0</span>
+            xMin = Infinity
+            <span class="keyword">for</span> c, j <span class="keyword">in</span> <span class="property">@centroids</span>
+                min = <span class="property">@distanceMetric</span> c, x
+
+                <span class="keyword">if</span> min &lt; xMin
+                    cMin = j
+                    xMin = min
+
+            <span class="property">@clusters</span>[cMin].push i</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h4">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <h4>moveCentroids</h4>
+<p>Iterate through each cluster and move it&#39;s centroid to the mean of all
+the datapoints in that cluster.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    moveCentroids: -&gt;
+        <span class="keyword">for</span> cl, i <span class="keyword">in</span> <span class="property">@clusters</span>
+            <span class="keyword">continue</span> <span class="keyword">if</span> cl.length &lt; <span class="number">1</span> <span class="comment">#Avoid division by 0</span>
+
+            <span class="keyword">for</span> j <span class="keyword">in</span> [<span class="number">0.</span>..<span class="property">@n</span>]
+                sum = <span class="number">0</span>
+                <span class="keyword">for</span> d <span class="keyword">in</span> cl
+                    sum += <span class="property">@X</span>[d][j]
+                <span class="property">@centroids</span>[i][j] = sum/(cl.length)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h4">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <h4>hasConverged</h4>
+<p>Check whether any of the elements of the absolute difference between the
+previous centroid positions and the current are greater than a set tolerance.
+In case they&#39;re none are greater, then the algorithm has converged.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    hasConverged: -&gt;
+        <span class="keyword">return</span> <span class="literal">false</span> <span class="keyword">if</span> <span class="keyword">not</span> <span class="property">@enableConvergenceTest</span>
+
+        <span class="keyword">for</span> i <span class="keyword">in</span> [<span class="number">0.</span>..<span class="property">@n</span>]
+            <span class="keyword">for</span> j <span class="keyword">in</span> [<span class="number">0.</span>..<span class="property">@m</span>]
+                absDelta = Math.abs <span class="property">@prevCentroids</span>[i][j] - <span class="property">@centroids</span>[i][j]
+                <span class="keyword">return</span> <span class="literal">true</span> <span class="keyword">if</span> <span class="property">@tolerance</span> &gt; absDelta
+
+        <span class="keyword">return</span> <span class="literal">false</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h4">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <h4>sumSquared</h4>
+<p>The default distance metric used by the <code>findClosestCentroids</code> step. Takes the
+square of the euclidian distances between points. A custom metric can be used by
+changing the <code>options.distanceMetric</code> when initializing kMeans.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    sumSqured: (X, Y) -&gt;
+        sum = <span class="number">0</span>
+        n   = X.length
+
+        <span class="keyword">while</span> n--
+            sum += (Y[n] - X[n]) * (Y[n] - X[n])
+
+        sum</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>Check whether module.exports or exports are present, otherwise attach the class
+to the window object.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">if</span> module?.exports? <span class="keyword">or</span> exports?
+    module.exports = exports = kMeans
+<span class="keyword">else</span>
+    window.kMeans = kMeans</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
