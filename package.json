@@ -1,5 +1,5 @@
 {
-    "name": "simple-k-means",
+    "name": "kmeans-js",
     "version":  "0.1.1",
     "description": "Simple Javascript implementation of the k-means algorithm, for node.js and the browser",
     "keywords": [
